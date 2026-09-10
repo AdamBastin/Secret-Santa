@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Waiting | Secret Santa{% endblock %}
+
+{% block content %}
+  <section class="status-panel">
+    {% if assignment %}
+      <p class="eyebrow">Your assignment</p>
+      <h1>{{ assignment.name }}</h1>
+      <p>You are this person's Secret Santa. Keep it secret and have fun picking something thoughtful.</p>
+
+      <div class="answer-list">
+        {% for question in questionnaire.questions %}
+          <article class="answer-item">
+            <h2>{{ question.label }}</h2>
+            {% set answer = assignment_answers.get(question.id) %}
+            {% if answer is sequence and answer is not string %}
+              {% if answer %}
+                <ul>
+                  {% for item in answer %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>No answer provided.</p>
+              {% endif %}
+            {% elif answer %}
+              <p>{{ answer }}</p>
+            {% else %}
+              <p>No answer provided.</p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="eyebrow">All set</p>
+      <h1>Thanks, {{ registrant.name }}.</h1>
+      <p>Your questionnaire is saved. Hang tight until the admin assigns Secret Santas.</p>
+    {% endif %}
+
+    {% if registrant.is_admin %}
+      <a class="button secondary" href="{{ url_for('main.admin') }}">View admin page</a>
+    {% endif %}
+  </section>
+{% endblock %}

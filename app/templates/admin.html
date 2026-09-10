@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Admin | Secret Santa{% endblock %}
+
+{% block content %}
+  <section class="status-panel wide">
+    <p class="eyebrow">Admin</p>
+    <h1>Registrant list</h1>
+    {% if assignments_started %}
+      <p>Assignments have started and registration is closed.</p>
+    {% else %}
+      <p>Review registrants and configure restrictions before starting assignments.</p>
+    {% endif %}
+    <a class="button secondary" href="{{ url_for('main.assignment_settings') }}">Edit assignment restrictions</a>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Questionnaire</th>
+          <th>Assignment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in registrants %}
+          <tr>
+            <td>{{ person.name }}</td>
+            <td>{% if person.is_admin %}Admin{% else %}Participant{% endif %}</td>
+            <td>{% if person.completed_at %}Complete{% else %}Not complete{% endif %}</td>
+            <td>{% if person.assigned_at %}Assigned{% else %}Not assigned{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

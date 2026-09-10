@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Assignment Restrictions | Secret Santa{% endblock %}
+
+{% block content %}
+  <section class="status-panel wide">
+    <p class="eyebrow">Admin</p>
+    <h1>Assignment restrictions</h1>
+    {% if assignments_started %}
+      <p>Assignments have started. Registration is closed and restrictions are locked.</p>
+    {% else %}
+      <p>Check anyone a participant cannot be matched with, then start assignments when registration is complete.</p>
+    {% endif %}
+
+    {% if registrants|length < 2 %}
+      <p>At least two registrants are needed before restrictions can be configured.</p>
+    {% elif assignments_started %}
+      <table>
+        <thead>
+          <tr>
+            <th>Giver</th>
+            <th>Recipient</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in assignments %}
+            <tr>
+              <td>{{ assignment.giver_name }}</td>
+              <td>{{ assignment.recipient_name }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <form method="post">
+        <div class="restriction-list">
+          {% for giver in registrants %}
+            <fieldset class="restriction-group">
+              <legend>{{ giver.name }} cannot match with</legend>
+              <div class="check-grid">
+                {% for recipient in registrants %}
+                  <label class="check-option {% if recipient.id == giver.id %}disabled{% endif %}">
+                    <input
+                      type="checkbox"
+                      name="cannot_match_{{ giver.id }}"
+                      value="{{ recipient.id }}"
+                      {% if recipient.id == giver.id %}checked disabled{% endif %}
+                      {% if (giver.id, recipient.id) in exclusions %}checked{% endif %}
+                    >
+                    {{ recipient.name }}
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+          {% endfor %}
+        </div>
+
+        <button class="button" type="submit">Save restrictions</button>
+      </form>
+
+      <form method="post" action="{{ url_for('main.start_assignments') }}">
+        <button class="button danger" type="submit">Start assignments and close registration</button>
+      </form>
+    {% endif %}
+  </section>
+{% endblock %}

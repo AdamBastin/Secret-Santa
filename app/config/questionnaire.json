@@ -1,0 +1,38 @@
+{
+  "title": "Secret Santa Questionnaire",
+  "intro": "Help your Secret Santa pick something thoughtful.",
+  "questions": [
+    {
+      "id": "favorite_snacks",
+      "label": "Favorite snacks or treats",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "id": "hobbies",
+      "label": "Hobbies, fandoms, or things you enjoy",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "id": "shirt_size",
+      "label": "Shirt size",
+      "type": "select",
+      "required": false,
+      "options": ["Prefer not to say", "XS", "S", "M", "L", "XL", "XXL", "Other"]
+    },
+    {
+      "id": "gift_categories",
+      "label": "Gift categories you would enjoy",
+      "type": "checkboxes",
+      "required": false,
+      "options": ["Books", "Games", "Coffee or tea", "Home goods", "Desk accessories", "Food", "Experiences"]
+    },
+    {
+      "id": "avoid",
+      "label": "Anything to avoid, including allergies",
+      "type": "textarea",
+      "required": false
+    }
+  ]
+}
