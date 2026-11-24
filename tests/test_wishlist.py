@@ -95,8 +95,12 @@ class WishlistFlowTests(unittest.TestCase):
 
         self.register("Alice", "1234")
         self.client.post("/admin/assignments/start")
+        admin_response = self.client.get("/admin/assignments")
         response = self.client.get("/waiting")
 
+        self.assertIn(b'<details class="assignment-reveal">', admin_response.data)
+        self.assertIn(b"Reveal assignment", admin_response.data)
+        self.assertNotIn(b'<details class="assignment-reveal" open>', admin_response.data)
         self.assertIn(b"Bob", response.data)
         self.assertIn(b"$75.50", response.data)
         self.assertIn(b"Coffee beans", response.data)

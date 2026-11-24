@@ -26,7 +26,12 @@
           {% for assignment in assignments %}
             <tr>
               <td>{{ assignment.giver_name }}</td>
-              <td>{{ assignment.recipient_name }}</td>
+              <td>
+                <details class="assignment-reveal">
+                  <summary>Reveal assignment</summary>
+                  <p>{{ assignment.recipient_name }}</p>
+                </details>
+              </td>
             </tr>
           {% endfor %}
         </tbody>

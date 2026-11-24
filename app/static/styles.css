@@ -355,6 +355,23 @@ th {
   text-transform: uppercase;
 }
 
+.assignment-reveal summary {
+  width: fit-content;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: var(--green);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.assignment-reveal p {
+  margin: 10px 0 0;
+  color: var(--text);
+  font-weight: 800;
+}
+
 @media (max-width: 640px) {
   .site-header {
     align-items: flex-start;
