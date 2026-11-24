@@ -5,16 +5,19 @@ from .models import (
     create_secret_santa_assignments,
     get_assignment_exclusions,
     get_assignment_for_registrant,
-    get_questionnaire_answers,
+    get_spend_limit_cents,
+    get_wishlist_items,
     get_registrant,
-    has_completed_questionnaire,
+    has_completed_wishlist,
     list_assignments,
     list_registrants,
     login_or_create_registrant,
     save_assignment_exclusions,
-    save_questionnaire_response,
+    save_spend_limit_cents,
+    save_wishlist,
 )
-from .questionnaire import collect_answers, load_questionnaire
+from .spend_limit import format_spend_limit, parse_spend_limit, spend_limit_input_value
+from .wishlist import collect_wishlist_items
 
 
 bp = Blueprint("main", __name__)
@@ -38,36 +41,41 @@ def register():
             flash(str(exc), "error")
         else:
             session["registrant_id"] = registrant.id
-            if has_completed_questionnaire(registrant.id):
+            if has_completed_wishlist(registrant.id):
                 return redirect(url_for("main.waiting"))
-            return redirect(url_for("main.questionnaire"))
+            return redirect(url_for("main.wishlist"))
 
     return render_template("register.html")
 
 
-@bp.route("/questionnaire", methods=("GET", "POST"))
-def questionnaire():
+@bp.route("/wishlist", methods=("GET", "POST"))
+def wishlist():
     registrant = require_registrant()
     if registrant is None:
         return redirect(url_for("main.register"))
 
-    questionnaire_config = load_questionnaire()
-    answers = {}
-    errors = {}
+    items = get_wishlist_items(registrant.id)
+    error = None
 
     if request.method == "POST":
-        answers, errors = collect_answers(request.form, questionnaire_config)
-        if not errors:
-            save_questionnaire_response(registrant.id, answers)
+        items, error = collect_wishlist_items(request.form)
+        if error is None:
+            save_wishlist(registrant.id, items)
             return redirect(url_for("main.waiting"))
 
     return render_template(
-        "questionnaire.html",
-        answers=answers,
-        errors=errors,
-        questionnaire=questionnaire_config,
+        "wishlist.html",
+        error=error,
+        items=items,
         registrant=registrant,
+        spend_limit=format_spend_limit(get_spend_limit_cents()),
     )
+
+
+@bp.route("/questionnaire")
+def questionnaire():
+    """Keep old bookmarks working after the setup flow changed."""
+    return redirect(url_for("main.wishlist"))
 
 
 @bp.route("/waiting")
@@ -76,34 +84,49 @@ def waiting():
     if registrant is None:
         return redirect(url_for("main.register"))
 
-    if not has_completed_questionnaire(registrant.id):
-        return redirect(url_for("main.questionnaire"))
+    if not has_completed_wishlist(registrant.id):
+        return redirect(url_for("main.wishlist"))
 
     assignment = get_assignment_for_registrant(registrant.id)
-    assignment_answers = {}
+    assignment_wishlist = []
     if assignment:
-        assignment_answers = get_questionnaire_answers(assignment["id"])
+        assignment_wishlist = get_wishlist_items(assignment["id"])
 
     return render_template(
         "waiting.html",
         assignment=assignment,
-        assignment_answers=assignment_answers,
-        questionnaire=load_questionnaire(),
+        assignment_wishlist=assignment_wishlist,
         registrant=registrant,
+        spend_limit=format_spend_limit(get_spend_limit_cents()),
     )
 
 
-@bp.route("/admin")
+@bp.route("/admin", methods=("GET", "POST"))
 def admin():
     registrant = require_admin()
     if not registrant:
         return admin_redirect()
 
+    if request.method == "POST":
+        try:
+            spend_limit_cents = parse_spend_limit(
+                request.form.get("spend_limit", "")
+            )
+        except ValueError as exc:
+            flash(str(exc), "error")
+        else:
+            save_spend_limit_cents(spend_limit_cents)
+            flash("Spending limit updated.", "success")
+        return redirect(url_for("main.admin"))
+
+    spend_limit_cents = get_spend_limit_cents()
     return render_template(
         "admin.html",
         assignments_started=assignments_started(),
         registrant=registrant,
         registrants=list_registrants(),
+        spend_limit=format_spend_limit(spend_limit_cents),
+        spend_limit_value=spend_limit_input_value(spend_limit_cents),
     )
 
 

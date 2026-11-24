@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist | Secret Santa{% endblock %}
+
+{% block content %}
+  <section class="form-panel">
+    <p class="eyebrow">Step 2</p>
+    <h1>Build your wishlist.</h1>
+    <div class="spend-limit" role="note">
+      <span>Spending limit</span>
+      <strong>{{ spend_limit }}</strong>
+    </div>
+    <p>Add up to five gift ideas. Only your Secret Santa will see them after assignments are made.</p>
+
+    <form method="post">
+      <fieldset class="question">
+        <legend>Wishlist items</legend>
+        <div class="wishlist-fields">
+          {% for index in range(5) %}
+            <label>
+              Item {{ index + 1 }}{% if index == 0 %} <span aria-label="required">*</span>{% endif %}
+              <input
+                name="items"
+                maxlength="200"
+                value="{{ items[index] if index < items|length else '' }}"
+                {% if index == 0 %}required{% endif %}
+              >
+            </label>
+          {% endfor %}
+        </div>
+
+        {% if error %}
+          <p class="field-error">{{ error }}</p>
+        {% endif %}
+      </fieldset>
+
+      <button class="button" type="submit">Save wishlist</button>
+    </form>
+  </section>
+{% endblock %}

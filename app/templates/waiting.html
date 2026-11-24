@@ -7,36 +7,29 @@
     {% if assignment %}
       <p class="eyebrow">Your assignment</p>
       <h1>{{ assignment.name }}</h1>
-      <p>You are this person's Secret Santa. Keep it secret and have fun picking something thoughtful.</p>
+      <div class="spend-limit" role="note">
+        <span>Spending limit</span>
+        <strong>{{ spend_limit }}</strong>
+      </div>
+      <p>You are this person's Secret Santa. Here are the gift ideas on their wishlist.</p>
 
       <div class="answer-list">
-        {% for question in questionnaire.questions %}
+        {% for item in assignment_wishlist %}
           <article class="answer-item">
-            <h2>{{ question.label }}</h2>
-            {% set answer = assignment_answers.get(question.id) %}
-            {% if answer is sequence and answer is not string %}
-              {% if answer %}
-                <ul>
-                  {% for item in answer %}
-                    <li>{{ item }}</li>
-                  {% endfor %}
-                </ul>
-              {% else %}
-                <p>No answer provided.</p>
-              {% endif %}
-            {% elif answer %}
-              <p>{{ answer }}</p>
-            {% else %}
-              <p>No answer provided.</p>
-            {% endif %}
+            <h2>Gift idea {{ loop.index }}</h2>
+            <p>{{ item }}</p>
           </article>
+        {% else %}
+          <p>No wishlist items were provided.</p>
         {% endfor %}
       </div>
     {% else %}
       <p class="eyebrow">All set</p>
       <h1>Thanks, {{ registrant.name }}.</h1>
-      <p>Your questionnaire is saved. Hang tight until the admin assigns Secret Santas.</p>
+      <p>Your wishlist is saved. Hang tight until the admin assigns Secret Santas.</p>
     {% endif %}
+
+    <a class="button" href="{{ url_for('main.wishlist') }}">Edit your wishlist</a>
 
     {% if registrant.is_admin %}
       <a class="button secondary" href="{{ url_for('main.admin') }}">View admin page</a>

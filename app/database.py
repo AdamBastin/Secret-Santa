@@ -12,13 +12,20 @@ CREATE TABLE IF NOT EXISTS registrants (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS questionnaire_responses (
+CREATE TABLE IF NOT EXISTS wishlists (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     registrant_id INTEGER NOT NULL UNIQUE,
-    answers_json TEXT NOT NULL,
+    items_json TEXT NOT NULL,
     completed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (registrant_id) REFERENCES registrants (id)
 );
+
+CREATE TABLE IF NOT EXISTS event_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    spend_limit_cents INTEGER NOT NULL CHECK (spend_limit_cents > 0)
+);
+
+INSERT OR IGNORE INTO event_settings (id, spend_limit_cents) VALUES (1, 5000);
 
 CREATE TABLE IF NOT EXISTS assignment_exclusions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

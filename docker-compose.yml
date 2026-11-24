@@ -1,0 +1,14 @@
+services:
+  secret-santa:
+    image: docker.io/adambastin/secret-santa:latest
+    container_name: secret-santa
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-change-me}
+    volumes:
+      - secret-santa-data:/app/instance
+
+volumes:
+  secret-santa-data:

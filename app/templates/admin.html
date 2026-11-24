@@ -13,12 +13,33 @@
     {% endif %}
     <a class="button secondary" href="{{ url_for('main.assignment_settings') }}">Edit assignment restrictions</a>
 
+    <form method="post" class="settings-form">
+      <div>
+        <label for="spend_limit">Spending limit</label>
+        <p class="field-help">Shown to everyone when they create or view a wishlist.</p>
+      </div>
+      <div class="currency-input">
+        <span aria-hidden="true">$</span>
+        <input
+          id="spend_limit"
+          name="spend_limit"
+          type="number"
+          min="0.01"
+          max="1000000"
+          step="0.01"
+          value="{{ spend_limit_value }}"
+          required
+        >
+      </div>
+      <button class="button" type="submit">Update limit</button>
+    </form>
+
     <table>
       <thead>
         <tr>
           <th>Name</th>
           <th>Role</th>
-          <th>Questionnaire</th>
+          <th>Wishlist</th>
           <th>Assignment</th>
         </tr>
       </thead>

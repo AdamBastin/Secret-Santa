@@ -104,11 +104,11 @@ def list_registrants():
     return get_db().execute(
         """
         SELECT registrants.id, registrants.name, registrants.pin, registrants.is_admin,
-               questionnaire_responses.completed_at,
+               wishlists.completed_at,
                assignments.assigned_at
         FROM registrants
-        LEFT JOIN questionnaire_responses
-            ON questionnaire_responses.registrant_id = registrants.id
+        LEFT JOIN wishlists
+            ON wishlists.registrant_id = registrants.id
         LEFT JOIN assignments
             ON assignments.giver_id = registrants.id
         ORDER BY registrants.created_at ASC
@@ -220,20 +220,20 @@ def get_assignment_for_registrant(registrant_id):
     ).fetchone()
 
 
-def get_questionnaire_answers(registrant_id):
+def get_wishlist_items(registrant_id):
     row = get_db().execute(
         """
-        SELECT answers_json
-        FROM questionnaire_responses
+        SELECT items_json
+        FROM wishlists
         WHERE registrant_id = ?
         """,
         (registrant_id,),
     ).fetchone()
 
     if row is None:
-        return {}
+        return []
 
-    return json.loads(row["answers_json"])
+    return json.loads(row["items_json"])
 
 
 def list_assignments():
@@ -252,24 +252,40 @@ def list_assignments():
     ).fetchall()
 
 
-def save_questionnaire_response(registrant_id, answers):
+def save_wishlist(registrant_id, items):
     db = get_db()
     db.execute(
         """
-        INSERT INTO questionnaire_responses (registrant_id, answers_json)
+        INSERT INTO wishlists (registrant_id, items_json)
         VALUES (?, ?)
         ON CONFLICT(registrant_id)
-        DO UPDATE SET answers_json = excluded.answers_json,
+        DO UPDATE SET items_json = excluded.items_json,
                       completed_at = CURRENT_TIMESTAMP
         """,
-        (registrant_id, json.dumps(answers)),
+        (registrant_id, json.dumps(items)),
     )
     db.commit()
 
 
-def has_completed_questionnaire(registrant_id):
+def has_completed_wishlist(registrant_id):
     row = get_db().execute(
-        "SELECT 1 FROM questionnaire_responses WHERE registrant_id = ?",
+        "SELECT 1 FROM wishlists WHERE registrant_id = ?",
         (registrant_id,),
     ).fetchone()
     return row is not None
+
+
+def get_spend_limit_cents():
+    row = get_db().execute(
+        "SELECT spend_limit_cents FROM event_settings WHERE id = 1"
+    ).fetchone()
+    return row["spend_limit_cents"]
+
+
+def save_spend_limit_cents(spend_limit_cents):
+    db = get_db()
+    db.execute(
+        "UPDATE event_settings SET spend_limit_cents = ? WHERE id = 1",
+        (spend_limit_cents,),
+    )
+    db.commit()
